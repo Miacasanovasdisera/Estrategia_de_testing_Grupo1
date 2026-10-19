@@ -70,9 +70,9 @@ public class PersistenciaIntegracionTest {
     @Test
     @Order(3)
     public void testCargarConLimiteValido() throws SQLException {
-        // Clase de equivalencia válida: límite > 0 (ej. 5)
-        ArrayList<AsociadoDTO> lote = dao.cargarConLimite(5);
-        assertEquals(5, lote.size(), "Debe recuperar exactamente la cantidad indicada en el límite.");
+        // Clase de equivalencia válida: límite > 0. Valor límite válido: 1
+        ArrayList<AsociadoDTO> lote = dao.cargarConLimite(1);
+        assertEquals(1, lote.size(), "Debe recuperar exactamente la cantidad indicada en el límite.");
     }
 
     @Test
@@ -99,8 +99,8 @@ public class PersistenciaIntegracionTest {
     @Test
     @Order(6)
     public void testGuardarAsociadoValido() throws SQLException {
-        Domicilio dom = new Domicilio("Mar del Plata", 100, " Alem");
-        Asociado nuevo = new Asociado("99887766", "223999888", " Codd", "Edgar", dom);
+        Domicilio dom = new Domicilio("Alem", 100, "Mar del Plata");
+        Asociado nuevo = new Asociado("Edgar", "Codd", "99887766", "223999888", dom);
 
         dao.guardar(nuevo);
 
@@ -116,8 +116,8 @@ public class PersistenciaIntegracionTest {
     public void testGuardarAsociadoDniDuplicadoLanzaSQLException() {
         // El DNI '12345678' ya existe en los datos semilla (Juan State). 
         // La columna DNI es UNIQUE en MySQL, por lo que debe lanzar SQLException.
-        Domicilio dom = new Domicilio("Mar del Plata", 123, "Calle Falsa");
-        Asociado duplicado = new Asociado("12345678", "223000000", "Perez", "Clon", dom);
+        Domicilio dom = new Domicilio("Calle Falsa", 123, "Mar del Plata");
+        Asociado duplicado = new Asociado("Clon", "Perez", "12345678", "223000000", dom);
 
         assertThrows(SQLException.class, () -> {
             dao.guardar(duplicado);
@@ -140,8 +140,8 @@ public class PersistenciaIntegracionTest {
     public void testActualizarAsociadoExistente() throws SQLException {
         // ESTE TEST DETECTARÁ EL BUG DE ACTUALIZACIÓN (WHERE id = 1 hardcodeado en BaseDeDatos)
         // Intentamos modificar a Maria Template (ID 2, DNI '87654321') cambiando su calle y teléfono
-        Domicilio nuevoDom = new Domicilio("Mar del Plata", 999, "Calle Modificada");
-        Asociado mariaModificada = new Asociado("87654321", "2231111111", "Template", "Maria", nuevoDom);
+        Domicilio nuevoDom = new Domicilio("Calle Modificada", 999, "Mar del Plata");
+        Asociado mariaModificada = new Asociado("Maria", "Template", "87654321", "2231111111", nuevoDom);
 
         dao.actualizar(mariaModificada);
 
@@ -178,5 +178,41 @@ public class PersistenciaIntegracionTest {
         assertThrows(AssertionError.class, () -> {
             dao.eliminar("");
         }, "No debe permitir eliminar pasando un DNI vacío.");
+    }
+
+    // =========================================================================
+    // 7. CLASES DE EQUIVALENCIA Y MAPEO
+    // =========================================================================
+    @Test
+    @Order(12)
+    public void testCargarPorIdInvalido() {
+        // Clase de equivalencia inválida: id <= 0. Valor límite inválido: 0
+        assertThrows(AssertionError.class, () -> {
+            dao.cargar(0);
+        }, "Debe lanzar AssertionError si el id es menor o igual a 0.");
+    }
+
+    @Test
+    @Order(13)
+    public void testMapeoCompletoAlGuardar() throws SQLException {
+        // Valores distintos en cada campo para detectar columnas intercambiadas
+        Domicilio dom = new Domicilio("Independencia", 2450, "Batan");
+        Asociado nuevo = new Asociado("Grace", "Hopper", "55443322", "2234567890", dom);
+
+        dao.guardar(nuevo);
+
+        AsociadoDTO enBD = dao.cargarBD().stream()
+                .filter(a -> a.getDni().equals("55443322"))
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull(enBD, "El asociado guardado debe existir en la base de datos.");
+        assertEquals("Grace", enBD.getNombre(), "Nombre mal mapeado.");
+        assertEquals("Hopper", enBD.getApellido(), "Apellido mal mapeado.");
+        assertEquals("55443322", enBD.getDni(), "DNI mal mapeado.");
+        assertEquals("2234567890", enBD.getTelefono(), "Teléfono mal mapeado.");
+        assertEquals("Independencia", enBD.getCalle(), "Calle mal mapeada.");
+        assertEquals(2450, enBD.getNumero(), "Número mal mapeado.");
+        assertEquals("Batan", enBD.getCiudad(), "Ciudad mal mapeada.");
     }
 }
