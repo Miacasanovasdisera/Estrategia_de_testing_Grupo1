@@ -87,7 +87,6 @@ public class PersistenciaIntegracionTest {
     @Test
     @Order(5)
     public void testCargarIndividualPorId() throws SQLException {
-        // ESTE TEST DETECTARÁ EL BUG EN DataAccessObject.cargar(int id) (falta resultado.next())
         AsociadoDTO recuperado = dao.cargar(1);
         assertNotNull(recuperado, "Debe recuperar el asociado con ID 1.");
         assertEquals("12345678", recuperado.getDni(), "El DNI del asociado con ID 1 debe ser 12345678.");
@@ -99,8 +98,10 @@ public class PersistenciaIntegracionTest {
     @Test
     @Order(6)
     public void testGuardarAsociadoValido() throws SQLException {
+
         Domicilio dom = new Domicilio("Alem", 100, "Mar del Plata");
         Asociado nuevo = new Asociado("Edgar", "Codd", "99887766", "223999888", dom);
+
 
         dao.guardar(nuevo);
 
@@ -118,6 +119,7 @@ public class PersistenciaIntegracionTest {
         // La columna DNI es UNIQUE en MySQL, por lo que debe lanzar SQLException.
         Domicilio dom = new Domicilio("Calle Falsa", 123, "Mar del Plata");
         Asociado duplicado = new Asociado("Clon", "Perez", "12345678", "223000000", dom);
+
 
         assertThrows(SQLException.class, () -> {
             dao.guardar(duplicado);
@@ -145,7 +147,6 @@ public class PersistenciaIntegracionTest {
 
         dao.actualizar(mariaModificada);
 
-        // Buscamos a Maria por su DNI en la base de datos para verificar el cambio
         ArrayList<AsociadoDTO> todos = dao.cargarBD();
         AsociadoDTO mariaEnBD = todos.stream()
                 .filter(a -> a.getDni().equals("87654321"))
