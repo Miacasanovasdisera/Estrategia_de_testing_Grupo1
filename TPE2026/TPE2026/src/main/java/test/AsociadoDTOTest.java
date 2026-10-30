@@ -1,4 +1,4 @@
-package test; 
+package test;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -6,22 +6,19 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import persistencia.AsociadoDTO;
 
-
 public class AsociadoDTOTest {
 
     private AsociadoDTO asociado;
 
     @BeforeEach
     public void setUp() {
-        // Inicializamos el DTO de forma aislada antes de cada test
+        // Inicialización aislada en memoria previa a cada test
         asociado = new AsociadoDTO();
     }
 
-    // --- Tests para Atributos de Texto (Clases de equivalencia) ---
-    
     // ==========================================
     // TESTS PARA NOMBRE
-    // ==========================================    
+    // ==========================================
 
     @Test
     public void testSetNombreValido() {
@@ -31,13 +28,14 @@ public class AsociadoDTOTest {
 
     @Test
     public void testSetNombreNuloLanzaError() {
-        // Intercepta el AssertionError generado por el assert del setter al enviar null
-        assertThrows(AssertionError.class, () -> asociado.setNombre(null), "Debe fallar al asignar un nombre nulo.");
+        assertThrows(AssertionError.class, () -> asociado.setNombre(null), 
+                "Debe fallar con AssertionError al asignar un nombre nulo.");
     }
-    
+
     // ==========================================
     // TESTS PARA APELLIDO
     // ==========================================
+
     @Test
     public void testSetApellidoValido() {
         asociado.setApellido("Casanovas");
@@ -46,13 +44,14 @@ public class AsociadoDTOTest {
 
     @Test
     public void testSetApellidoNuloLanzaError() {
-        // Intercepta el AssertionError generado por el assert del setter al enviar null[cite: 4]
-        assertThrows(AssertionError.class, () -> asociado.setApellido(null), "Debe fallar al asignar un apellido nulo.");
+        assertThrows(AssertionError.class, () -> asociado.setApellido(null), 
+                "Debe fallar con AssertionError al asignar un apellido nulo.");
     }
 
     // ==========================================
     // TESTS PARA DNI
     // ==========================================
+
     @Test
     public void testSetDniValido() {
         asociado.setDni("12345678");
@@ -61,13 +60,14 @@ public class AsociadoDTOTest {
 
     @Test
     public void testSetDniNuloLanzaError() {
-        // Intercepta el AssertionError generado por el assert del setter al enviar null[cite: 4]
-        assertThrows(AssertionError.class, () -> asociado.setDni(null), "Debe fallar al asignar un DNI nulo.");
+        assertThrows(AssertionError.class, () -> asociado.setDni(null), 
+                "Debe fallar con AssertionError al asignar un DNI nulo.");
     }
 
     // ==========================================
     // TESTS PARA CIUDAD
     // ==========================================
+
     @Test
     public void testSetCiudadValida() {
         asociado.setCiudad("Mar del Plata");
@@ -76,13 +76,14 @@ public class AsociadoDTOTest {
 
     @Test
     public void testSetCiudadNulaLanzaError() {
-        // Intercepta el AssertionError generado por el assert del setter al enviar null
-        assertThrows(AssertionError.class, () -> asociado.setCiudad(null), "Debe fallar al asignar una ciudad nula.");
+        assertThrows(AssertionError.class, () -> asociado.setCiudad(null), 
+                "Debe fallar con AssertionError al asignar una ciudad nula.");
     }
 
     // ==========================================
     // TESTS PARA CALLE
     // ==========================================
+
     @Test
     public void testSetCalleValida() {
         asociado.setCalle("Av. Colón");
@@ -91,13 +92,14 @@ public class AsociadoDTOTest {
 
     @Test
     public void testSetCalleNulaLanzaError() {
-        // Intercepta el AssertionError generado por el assert del setter al enviar null
-        assertThrows(AssertionError.class, () -> asociado.setCalle(null), "Debe fallar al asignar una calle nula.");
+        assertThrows(AssertionError.class, () -> asociado.setCalle(null), 
+                "Debe fallar con AssertionError al asignar una calle nula.");
     }
 
     // ==========================================
     // TESTS PARA TELEFONO
     // ==========================================
+
     @Test
     public void testSetTelefonoValido() {
         asociado.setTelefono("2231234567");
@@ -106,28 +108,31 @@ public class AsociadoDTOTest {
 
     @Test
     public void testSetTelefonoNuloLanzaError() {
-        // Intercepta el AssertionError generado por el assert del setter al enviar null[cite: 4]
-        assertThrows(AssertionError.class, () -> asociado.setTelefono(null), "Debe fallar al asignar un teléfono nulo.");
+        assertThrows(AssertionError.class, () -> asociado.setTelefono(null), 
+                "Debe fallar con AssertionError al asignar un teléfono nulo.");
     }
 
-    // IMPORTANTE: Repite los dos tests anteriores para apellido, dni, ciudad, calle y telefono.
-
-    // --- Tests para Atributos Numéricos (Valores Límite) ---
+    // ==========================================
+    // TESTS PARA NUMERO (VALORES LÍMITE)
+    // ==========================================
 
     @Test
     public void testSetNumeroValidoLimiteInferior() {
+        // Valor límite inferior según SRS (numero >= 0). 
+        // Con el código provisto (assert numero > 0), este test detecta el bug y falla en rojo.
         asociado.setNumero(0);
-        assertEquals(0, asociado.getNumero(), "El sistema debe aceptar el 0 como valor límite válido");
+        assertEquals(0, asociado.getNumero(), "El sistema debe aceptar el 0 como valor límite válido.");
     }
 
     @Test
     public void testSetNumeroValido() {
         asociado.setNumero(1);
-        assertEquals(1, asociado.getNumero(), "Debe permitir un número positivo.");
+        assertEquals(1, asociado.getNumero(), "Debe permitir un número entero positivo.");
     }
 
     @Test
     public void testSetNumeroInvalidoLimite() {
-        assertThrows(AssertionError.class, () -> asociado.setNumero(-1), "Se esperaba una excepción al ingresar un número negativo");
+        assertThrows(AssertionError.class, () -> asociado.setNumero(-1), 
+                "Se esperaba AssertionError al ingresar un número negativo.");
     }
 }

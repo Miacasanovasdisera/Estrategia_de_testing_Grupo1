@@ -172,6 +172,7 @@ public class PersistenciaIntegracionTest {
         boolean existe = todos.stream().anyMatch(a -> a.getDni().equals("12345678"));
         assertFalse(existe, "El asociado con DNI 12345678 ya no debe estar en la base de datos.");
     }
+    
 
     @Test
     @Order(11)
@@ -180,12 +181,23 @@ public class PersistenciaIntegracionTest {
             dao.eliminar("");
         }, "No debe permitir eliminar pasando un DNI vacío.");
     }
+    
+    @Test
+    @Order(12)
+    public void testEliminarConDniNuloLanzaError() {
+        // La precondición del contrato exige DNI no nulo.
+        // En el código provisto, assert !Objects.equals(dni, "") evalúa a true con null,
+        // dejando fugar el null hacia el PreparedStatement.
+        assertThrows(AssertionError.class, () -> {
+            dao.eliminar(null);
+        }, "Debe lanzar AssertionError si el DNI enviado para eliminación es null.");
+    }
 
     // =========================================================================
     // 7. CLASES DE EQUIVALENCIA Y MAPEO
     // =========================================================================
     @Test
-    @Order(12)
+    @Order(13)
     public void testCargarPorIdInvalido() {
         // Clase de equivalencia inválida: id <= 0. Valor límite inválido: 0
         assertThrows(AssertionError.class, () -> {
@@ -194,7 +206,7 @@ public class PersistenciaIntegracionTest {
     }
 
     @Test
-    @Order(13)
+    @Order(14)
     public void testMapeoCompletoAlGuardar() throws SQLException {
         // Valores distintos en cada campo para detectar columnas intercambiadas
         Domicilio dom = new Domicilio("Independencia", 2450, "Batan");
