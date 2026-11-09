@@ -11,8 +11,8 @@ public class BaseDeDatos {
     private static BaseDeDatos instancia;
     private Connection conexion;
     private static final String URL = "jdbc:mysql://localhost:3306/?useSSL=false&serverTimezone=UTC";
-    private static final String USUARIO = "progra_c";
-    private static final String CONTRASENA = "progra_c";
+    private static final String USUARIO = "root";
+    private static final String CONTRASENA = "root";
 
     /**
      * Constructor de la clase BaseDeDatos.
@@ -115,7 +115,7 @@ public class BaseDeDatos {
         stmt.setInt(5, aDTO.getNumero());
         stmt.setString(6, aDTO.getCiudad());
         stmt.setString(7, aDTO.getTelefono());
-        stmt.setInt(8, 1);
+        stmt.setString(8, aDTO.getDni());
         stmt.executeUpdate();
         stmt.close();
     }
