@@ -130,7 +130,7 @@ public class AmbulanciaMockConcurrenciaTest {
     @DisplayName("CP-CONC-03: Sincronización de Recursos Compartidos ante Múltiples Hilos")
     public void testAccesoConcurrenteAmbulancia() throws InterruptedException {
         final int CANTIDAD_HILOS = 10;
-        final int ITERACIONES = 100;
+        final int ITERACIONES = 10000;
         CountDownLatch latch = new CountDownLatch(CANTIDAD_HILOS);
         List<Throwable> errores = Collections.synchronizedList(new ArrayList<>());
 
