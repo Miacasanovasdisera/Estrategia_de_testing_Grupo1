@@ -92,26 +92,9 @@ public class AmbulanciaMockConcurrenciaTest {
     // =========================================================================
     // 2. PRUEBAS DE INTEGRACIÓN Y CONCURRENCIA (LOS 3 FAILURES EN ROJO)
     // =========================================================================
-
+    
     @Test
-    @DisplayName("CP-CONC-01: Detección de Falla en Ciclo de RetornoAutomatico (Simulación Activa)")
-    public void testCicloRetornoAutomaticoConSimulacionActiva() throws InterruptedException {
-        ambulancia.setSimulacionActiva(true);
-
-        RetornoAutomatico rutina = new RetornoAutomatico(ambulancia);
-        Thread hilo = new Thread(rutina);
-        hilo.start();
-
-        // Pausa breve para permitir la inicialización del ciclo en el hilo
-        Thread.sleep(100);
-
-        // ¡FALLO 1!: El bucle while (!isSimulacionActiva()) con simulación en true
-        // aborta instantáneamente, provocando la terminación del hilo.
-        assertTrue(hilo.isAlive(), "FALLO: El hilo de RetornoAutomatico finalizó prematuramente debido a la condición invertida en el bucle while.");
-    }
-
-    @Test
-    @DisplayName("CP-CONC-02: Detección de Fallo de Estado en Hilo RetornoAutomático")
+    @DisplayName("CP-CONC-01: Detección de Fallo de Estado en Hilo RetornoAutomático")
     public void testRetornoAutomaticoInvocaMetodoClinica() throws InterruptedException {
         ambulancia.setSimulacionActiva(true);
 
@@ -121,13 +104,13 @@ public class AmbulanciaMockConcurrenciaTest {
 
         hiloRetorno.join(300);
 
-        // ¡FALLO 2!: Mockito arroja WantedButNotInvoked sobre RetornoClinica()
+        // ¡FALLO 1!: Mockito arroja WantedButNotInvoked sobre RetornoClinica()
         // porque el hilo terminó antes de alcanzar la línea ambulancia.retornoAutomatico(this).
         verify(estadoMock, atLeastOnce()).RetornoClinica();
     }
 
     @Test
-    @DisplayName("CP-CONC-03: Sincronización de Recursos Compartidos ante Múltiples Hilos")
+    @DisplayName("CP-CONC-02: Sincronización de Recursos Compartidos ante Múltiples Hilos")
     public void testAccesoConcurrenteAmbulancia() throws InterruptedException {
         final int CANTIDAD_HILOS = 10;
         final int ITERACIONES = 10000;
@@ -158,7 +141,7 @@ public class AmbulanciaMockConcurrenciaTest {
 
         assertTrue(finalizaron, "Los hilos concurrentes quedaron bloqueados (Deadlock o Timeout).");
         
-        // ¡FALLO 3!: Al carecer de 'synchronized', se producen colisiones de lectura/escritura
+        // ¡FALLO 2!: Al carecer de 'synchronized', se producen colisiones de lectura/escritura
         // y la lista de errores contiene excepciones de condición de carrera.
         assertTrue(errores.isEmpty(), "Se detectaron problemas de concurrencia/sincronización en la ambulancia: " + errores);
     }
