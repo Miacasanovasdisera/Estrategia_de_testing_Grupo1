@@ -3,12 +3,6 @@ package test;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -110,39 +104,27 @@ public class AmbulanciaMockConcurrenciaTest {
     }
 
     @Test
-    @DisplayName("CP-CONC-02: Sincronización de Recursos Compartidos ante Múltiples Hilos")
-    public void testAccesoConcurrenteAmbulancia() throws InterruptedException {
-        final int CANTIDAD_HILOS = 10;
-        final int ITERACIONES = 10000;
-        CountDownLatch latch = new CountDownLatch(CANTIDAD_HILOS);
-        List<Throwable> errores = Collections.synchronizedList(new ArrayList<>());
+    @DisplayName("CP-CONC-02: El retorno automático debe liberar a los hilos en espera")
+    public void testRetornoAutomaticoLiberaHilosEnEspera() throws InterruptedException {
+        ambulancia.setOcupado(true);
+        Thread solicitante = new Thread(() -> ambulancia.atenderDomicilio(mock(Asociado.class)));
+        solicitante.start();
 
-        Runnable tareaConcurrente = () -> {
-            try {
-                for (int i = 0; i < ITERACIONES; i++) {
-                    ambulancia.setOcupado(i % 2 == 0);
-                    boolean ocupado = ambulancia.isOcupado();
-                    if (ocupado != (i % 2 == 0)) {
-                        throw new IllegalStateException("Condición de carrera detectada en ambulancia.isOcupado()");
-                    }
-                }
-            } catch (Throwable t) {
-                errores.add(t);
-            } finally {
-                latch.countDown();
-            }
-        };
-
-        for (int i = 0; i < CANTIDAD_HILOS; i++) {
-            new Thread(tareaConcurrente).start();
+        // Esperar a que el hilo quede bloqueado en wait() porque la ambulancia está ocupada
+        long limite = System.currentTimeMillis() + 1000;
+        while (solicitante.getState() != Thread.State.WAITING && System.currentTimeMillis() < limite) {
+            Thread.sleep(10);
         }
+        assertEquals(Thread.State.WAITING, solicitante.getState(), "El hilo debería estar esperando la ambulancia.");
 
-        boolean finalizaron = latch.await(5, TimeUnit.SECONDS);
+        // ¡FALLO 2!: retornoAutomatico() despierta a los hilos (notifyAll) pero no ejecuta
+        // setOcupado(false), por lo que el hilo vuelve a esperar y nunca es atendido.
+        ambulancia.retornoAutomatico(new RetornoAutomatico(ambulancia));
 
-        assertTrue(finalizaron, "Los hilos concurrentes quedaron bloqueados (Deadlock o Timeout).");
-        
-        // ¡FALLO 2!: Al carecer de 'synchronized', se producen colisiones de lectura/escritura
-        // y la lista de errores contiene excepciones de condición de carrera.
-        assertTrue(errores.isEmpty(), "Se detectaron problemas de concurrencia/sincronización en la ambulancia: " + errores);
+        try {
+            verify(estadoMock, timeout(1000)).SolicitudDeAtencionDomicilio();
+        } finally {
+            solicitante.interrupt();
+        }
     }
 }

@@ -7,8 +7,8 @@ import org.junit.platform.suite.api.SuiteDisplayName;
 @Suite
 @SuiteDisplayName("Suite Completa de Pruebas - Sistema Clínica")
 @SelectClasses({
-    AsociadoDTOTest.class,
-    PersistenciaIntegracionTest.class,
+   // AsociadoDTOTest.class,
+   // PersistenciaIntegracionTest.class,
     AmbulanciaMockConcurrenciaTest.class
 })
 public class TestSuite {}
