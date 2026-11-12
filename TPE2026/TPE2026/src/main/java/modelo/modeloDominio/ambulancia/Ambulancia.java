@@ -240,6 +240,7 @@ public class Ambulancia extends Observable {
      */
     public synchronized void retornoAutomatico(RetornoAutomatico retornoAutomatico) {
         estadoActual.RetornoClinica();
+        this.setOcupado(false);
         notifyAll();
     }
 

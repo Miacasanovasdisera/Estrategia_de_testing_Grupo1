@@ -2,3 +2,27 @@
 
 .metadata/
 *.zip
+
+# Local AI / code-intelligence tooling
+.codegraph/
+.atl/
+.claude/
+.engram/
+odd/
+
+# Python artifacts
+__pycache__/
+*.pyc
+
+# Java build output
+bin/
+*.class
+
+# OS / editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+
+# Office lock files
+~$*

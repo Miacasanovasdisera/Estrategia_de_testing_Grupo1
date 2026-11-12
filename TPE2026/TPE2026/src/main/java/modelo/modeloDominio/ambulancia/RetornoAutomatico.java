@@ -22,7 +22,7 @@ public class RetornoAutomatico implements Runnable {
      */
     @Override
     public void run() {
-        while (!ambulancia.isSimulacionActiva()) {
+        while (ambulancia.isSimulacionActiva()) {
             try {
                 Thread.sleep(INTERVALO_RETORNO);
             } catch (InterruptedException e) {

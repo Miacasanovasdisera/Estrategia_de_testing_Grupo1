@@ -96,11 +96,15 @@ public class AmbulanciaMockConcurrenciaTest {
         Thread hiloRetorno = new Thread(rutina);
         hiloRetorno.start();
 
-        hiloRetorno.join(300);
-
-        // ¡FALLO 1!: Mockito arroja WantedButNotInvoked sobre RetornoClinica()
-        // porque el hilo terminó antes de alcanzar la línea ambulancia.retornoAutomatico(this).
-        verify(estadoMock, atLeastOnce()).RetornoClinica();
+        // RetornoAutomatico espera 10 s (INTERVALO_RETORNO) antes de cada retorno,
+        // por eso se espera hasta 11 s a que se invoque RetornoClinica() al menos una vez.
+        try {
+            verify(estadoMock, timeout(11000).atLeastOnce()).RetornoClinica();
+        } finally {
+            // Detener la rutina para que el hilo no siga ejecutándose después del test
+            ambulancia.setSimulacionActiva(false);
+            hiloRetorno.interrupt();
+        }
     }
 
     @Test
