@@ -12,13 +12,8 @@ public class AsociadoDTOTest {
 
     @BeforeEach
     public void setUp() {
-        // Inicialización aislada en memoria previa a cada test
         asociado = new AsociadoDTO();
     }
-
-    // ==========================================
-    // TESTS PARA NOMBRE
-    // ==========================================
 
     @Test
     public void testSetNombreValido() {
@@ -32,10 +27,6 @@ public class AsociadoDTOTest {
                 "Debe fallar con AssertionError al asignar un nombre nulo.");
     }
 
-    // ==========================================
-    // TESTS PARA APELLIDO
-    // ==========================================
-
     @Test
     public void testSetApellidoValido() {
         asociado.setApellido("Casanovas");
@@ -47,10 +38,6 @@ public class AsociadoDTOTest {
         assertThrows(AssertionError.class, () -> asociado.setApellido(null), 
                 "Debe fallar con AssertionError al asignar un apellido nulo.");
     }
-
-    // ==========================================
-    // TESTS PARA DNI
-    // ==========================================
 
     @Test
     public void testSetDniValido() {
@@ -64,10 +51,6 @@ public class AsociadoDTOTest {
                 "Debe fallar con AssertionError al asignar un DNI nulo.");
     }
 
-    // ==========================================
-    // TESTS PARA CIUDAD
-    // ==========================================
-
     @Test
     public void testSetCiudadValida() {
         asociado.setCiudad("Mar del Plata");
@@ -79,10 +62,6 @@ public class AsociadoDTOTest {
         assertThrows(AssertionError.class, () -> asociado.setCiudad(null), 
                 "Debe fallar con AssertionError al asignar una ciudad nula.");
     }
-
-    // ==========================================
-    // TESTS PARA CALLE
-    // ==========================================
 
     @Test
     public void testSetCalleValida() {
@@ -96,10 +75,6 @@ public class AsociadoDTOTest {
                 "Debe fallar con AssertionError al asignar una calle nula.");
     }
 
-    // ==========================================
-    // TESTS PARA TELEFONO
-    // ==========================================
-
     @Test
     public void testSetTelefonoValido() {
         asociado.setTelefono("2231234567");
@@ -112,14 +87,9 @@ public class AsociadoDTOTest {
                 "Debe fallar con AssertionError al asignar un teléfono nulo.");
     }
 
-    // ==========================================
-    // TESTS PARA NUMERO (VALORES LÍMITE)
-    // ==========================================
-
     @Test
     public void testSetNumeroValidoLimiteInferior() {
-        // Valor límite inferior según SRS (numero >= 0). 
-        // Con el código provisto (assert numero > 0), este test detecta el bug y falla en rojo.
+        // Valor límite inferior válido (numero >= 0)
         asociado.setNumero(0);
         assertEquals(0, asociado.getNumero(), "El sistema debe aceptar el 0 como valor límite válido.");
     }

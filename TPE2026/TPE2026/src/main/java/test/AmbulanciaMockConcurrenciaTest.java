@@ -21,19 +21,14 @@ public class AmbulanciaMockConcurrenciaTest {
     @BeforeEach
     public void setUp() {
         ambulancia = new Ambulancia();
-        // Doble de prueba (Mock) para desacoplar de las implementaciones concretas de State
+        // Mock de State para no depender de los estados concretos
         estadoMock = mock(State.class);
         ambulancia.setState(estadoMock);
     }
 
-    // =========================================================================
-    // 1. PRUEBAS ATÓMICAS CON MOCKS (PASAN EN VERDE)
-    // =========================================================================
-
     @Test
     @DisplayName("CP-MOCK-01: Delegación de Solicitud de Mantenimiento al Estado")
     public void testDelegacionSolicitarMantenimiento() {
-        // Se utiliza un mock para Operario evitando constructores con precondiciones nulas
         Operario operarioMock = mock(Operario.class);
         ambulancia.solicitarMantenimiento(operarioMock);
 
@@ -83,10 +78,6 @@ public class AmbulanciaMockConcurrenciaTest {
         }, "La ambulancia debe propagar la excepción lanzada por la máquina de estados.");
     }
 
-    // =========================================================================
-    // 2. PRUEBAS DE INTEGRACIÓN Y CONCURRENCIA (LOS 3 FAILURES EN ROJO)
-    // =========================================================================
-    
     @Test
     @DisplayName("CP-CONC-01: Detección de Fallo de Estado en Hilo RetornoAutomático")
     public void testRetornoAutomaticoInvocaMetodoClinica() throws InterruptedException {
@@ -96,12 +87,10 @@ public class AmbulanciaMockConcurrenciaTest {
         Thread hiloRetorno = new Thread(rutina);
         hiloRetorno.start();
 
-        // RetornoAutomatico espera 10 s (INTERVALO_RETORNO) antes de cada retorno,
-        // por eso se espera hasta 11 s a que se invoque RetornoClinica() al menos una vez.
+        // RetornoAutomatico espera 10 s antes de cada retorno
         try {
             verify(estadoMock, timeout(11000).atLeastOnce()).RetornoClinica();
         } finally {
-            // Detener la rutina para que el hilo no siga ejecutándose después del test
             ambulancia.setSimulacionActiva(false);
             hiloRetorno.interrupt();
         }
@@ -114,15 +103,13 @@ public class AmbulanciaMockConcurrenciaTest {
         Thread solicitante = new Thread(() -> ambulancia.atenderDomicilio(mock(Asociado.class)));
         solicitante.start();
 
-        // Esperar a que el hilo quede bloqueado en wait() porque la ambulancia está ocupada
+        // Esperar a que el hilo quede en wait() con la ambulancia ocupada
         long limite = System.currentTimeMillis() + 1000;
         while (solicitante.getState() != Thread.State.WAITING && System.currentTimeMillis() < limite) {
             Thread.sleep(10);
         }
         assertEquals(Thread.State.WAITING, solicitante.getState(), "El hilo debería estar esperando la ambulancia.");
 
-        // ¡FALLO 2!: retornoAutomatico() despierta a los hilos (notifyAll) pero no ejecuta
-        // setOcupado(false), por lo que el hilo vuelve a esperar y nunca es atendido.
         ambulancia.retornoAutomatico(new RetornoAutomatico(ambulancia));
 
         try {

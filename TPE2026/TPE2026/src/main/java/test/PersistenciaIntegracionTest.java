@@ -30,15 +30,12 @@ public class PersistenciaIntegracionTest {
 
     @BeforeEach
     public void setUp() {
-        // Obtenemos la instancia Singleton y reiniciamos la BD a su estado semilla antes de cada prueba
+        // Reinicia la BD con los datos semilla antes de cada test
         bd = BaseDeDatos.getInstancia();
         bd.iniciarBD();
         dao = new DataAccessObject();
     }
 
-    // =========================================================================
-    // 1. PATRÓN SINGLETON Y CONEXIÓN
-    // =========================================================================
     @Test
     @Order(1)
     public void testPatronSingleton() {
@@ -47,9 +44,6 @@ public class PersistenciaIntegracionTest {
         assertSame(bd, otraInstancia, "getInstancia() debe devolver exactamente la misma instancia (Singleton).");
     }
 
-    // =========================================================================
-    // 2. INICIALIZACIÓN DE TABLAS Y DATOS SEMILLA
-    // =========================================================================
     @Test
     @Order(2)
     public void testInicializacionYDatosSemilla() throws SQLException {
@@ -64,9 +58,6 @@ public class PersistenciaIntegracionTest {
         assertEquals("12345678", primero.getDni());
     }
 
-    // =========================================================================
-    // 3. OPERACIONES DE CARGA (READ): Lotes acotados e individual
-    // =========================================================================
     @Test
     @Order(3)
     public void testCargarConLimiteValido() throws SQLException {
@@ -92,16 +83,12 @@ public class PersistenciaIntegracionTest {
         assertEquals("12345678", recuperado.getDni(), "El DNI del asociado con ID 1 debe ser 12345678.");
     }
 
-    // =========================================================================
-    // 4. OPERACIÓN DE GUARDADO (CREATE) Y RESTRICCIONES SQL
-    // =========================================================================
     @Test
     @Order(6)
     public void testGuardarAsociadoValido() throws SQLException {
 
         Domicilio dom = new Domicilio("Alem", 100, "Mar del Plata");
         Asociado nuevo = new Asociado("Edgar", "Codd", "99887766", "223999888", dom);
-
 
         dao.guardar(nuevo);
 
@@ -115,11 +102,9 @@ public class PersistenciaIntegracionTest {
     @Test
     @Order(7)
     public void testGuardarAsociadoDniDuplicadoLanzaSQLException() {
-        // El DNI '12345678' ya existe en los datos semilla (Juan State). 
-        // La columna DNI es UNIQUE en MySQL, por lo que debe lanzar SQLException.
+        // El DNI '12345678' ya existe en los datos semilla y la columna es UNIQUE
         Domicilio dom = new Domicilio("Calle Falsa", 123, "Mar del Plata");
         Asociado duplicado = new Asociado("Clon", "Perez", "12345678", "223000000", dom);
-
 
         assertThrows(SQLException.class, () -> {
             dao.guardar(duplicado);
@@ -134,14 +119,10 @@ public class PersistenciaIntegracionTest {
         }, "Guardar un asociado nulo debe ser rechazado por la precondición.");
     }
 
-    // =========================================================================
-    // 5. OPERACIÓN DE ACTUALIZACIÓN (UPDATE)
-    // =========================================================================
     @Test
     @Order(9)
     public void testActualizarAsociadoExistente() throws SQLException {
-        // ESTE TEST DETECTARÁ EL BUG DE ACTUALIZACIÓN (WHERE id = 1 hardcodeado en BaseDeDatos)
-        // Intentamos modificar a Maria Template (ID 2, DNI '87654321') cambiando su calle y teléfono
+        // Maria Template (ID 2, DNI '87654321')
         Domicilio nuevoDom = new Domicilio("Calle Modificada", 999, "Mar del Plata");
         Asociado mariaModificada = new Asociado("Maria", "Template", "87654321", "2231111111", nuevoDom);
 
@@ -158,9 +139,6 @@ public class PersistenciaIntegracionTest {
         assertEquals(999, mariaEnBD.getNumero(), "El número de calle de Maria debería haberse actualizado.");
     }
 
-    // =========================================================================
-    // 6. OPERACIÓN DE ELIMINACIÓN (DELETE)
-    // =========================================================================
     @Test
     @Order(10)
     public void testEliminarAsociadoPorDni() throws SQLException {
@@ -173,7 +151,6 @@ public class PersistenciaIntegracionTest {
         assertFalse(existe, "El asociado con DNI 12345678 ya no debe estar en la base de datos.");
     }
     
-
     @Test
     @Order(11)
     public void testEliminarConDniVacioLanzaError() {
@@ -185,17 +162,11 @@ public class PersistenciaIntegracionTest {
     @Test
     @Order(12)
     public void testEliminarConDniNuloLanzaError() {
-        // La precondición del contrato exige DNI no nulo.
-        // En el código provisto, assert !Objects.equals(dni, "") evalúa a true con null,
-        // dejando fugar el null hacia el PreparedStatement.
         assertThrows(AssertionError.class, () -> {
             dao.eliminar(null);
         }, "Debe lanzar AssertionError si el DNI enviado para eliminación es null.");
     }
 
-    // =========================================================================
-    // 7. CLASES DE EQUIVALENCIA Y MAPEO
-    // =========================================================================
     @Test
     @Order(13)
     public void testCargarPorIdInvalido() {
